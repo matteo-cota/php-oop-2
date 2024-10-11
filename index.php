@@ -1,9 +1,34 @@
 <?php
+session_start();
 spl_autoload_register(function ($class) {
     require_once __DIR__ . "/classes/$class.php";
 });
 require_once 'data/products.php';
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
+
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = new Cart();
+}
+
+
+if (isset($_POST['add_to_cart'])) {
+    $productId = $_POST['product_id'];
+
+    $product = getProductById($productId);
+    $_SESSION['cart']->addProduct($product);
+}
+
+
+function getProductById($id)
+{
+    global $products;
+    foreach ($products as $product) {
+        if ($product->getId() == $id) {
+            return $product;
+        }
+    }
+    return null;
+}
 
 switch ($page) {
     case 'Cibo':
@@ -69,20 +94,20 @@ switch ($page) {
         <h1 class="text-center">Prodotti Disponibili</h1>
         <div class="row">
             <?php foreach ($productsToShow as $product): ?>
-            <div class="col-md-4 mb-4">
-                <div class="card shadow-sm">
-                    <img src="<?php echo $product->getImage(); ?>" class="card-img-top"
-                        alt="<?php echo $product->getTitle(); ?>">
-                    <div class="card-body">
-                        <h5 class="card-title"><?php echo $product->getTitle(); ?></h5>
-                        <p class="card-text">Prezzo: €<?php echo number_format($product->getPrice(), 2, ',', '.'); ?>
-                        </p>
-                        <p class="card-text">Categoria: <?php echo $product->getCategory()->getName(); ?></p>
-                        <p class="card-text">Tipo: <?php echo get_class($product); ?></p>
-                        <a href="#" class="btn btn-primary">Aggiungi al Carrello</a>
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        <img src="<?php echo $product->getImage(); ?>" class="card-img-top"
+                            alt="<?php echo $product->getTitle(); ?>">
+                        <div class="card-body">
+                            <h5 class="card-title"><?php echo $product->getTitle(); ?></h5>
+                            <p class="card-text">Prezzo: €<?php echo number_format($product->getPrice(), 2, ',', '.'); ?>
+                            </p>
+                            <p class="card-text">Categoria: <?php echo $product->getCategory()->getName(); ?></p>
+                            <p class="card-text">Tipo: <?php echo get_class($product); ?></p>
+                            <a href="#" class="btn btn-primary">Aggiungi al Carrello</a>
+                        </div>
                     </div>
                 </div>
-            </div>
             <?php endforeach; ?>
         </div>
     </div>
